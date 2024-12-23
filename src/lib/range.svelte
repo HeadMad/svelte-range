@@ -2,36 +2,31 @@
   import clamp from "./clamp.js";
 
   let {
-    thumb,
-    track,
-    style = "",
-    onmove = () => {},
+    args,
+    children,
+    onaction = () => {},
     onstart = () => {},
-    onend = () => {}
+    onend = () => {},
+    ...attrs
   } = $props();
 
   const isTouch =
-		"ontouchstart" in globalThis ||
-		(globalThis.DocumentTouch &&
-			document instanceof globalThis.DocumentTouch) ||
-		navigator.maxTouchPoints > 0 ||
-		globalThis.navigator.msMaxTouchPoints > 0;
+		"ontouchstart" in globalThis
+    || (globalThis.DocumentTouch && document instanceof globalThis.DocumentTouch)
+    || navigator.maxTouchPoints > 0
+    || globalThis.navigator.msMaxTouchPoints > 0;
 
-  const eventNames = isTouch ? ["touchstart", "touchend", "touchmove"] : ["mousedown", "mouseup", "mousemove"];
+  const eventNames = isTouch
+  ? ["touchstart", "touchend", "touchmove"]
+  : ["mousedown", "mouseup", "mousemove"];
 
-  let range;
+
   let isPushed = false;
-
-  let w;
-  let h;
-
-  let params = $state({left: 0, top: 0, width: 0, height: 0});
-
-  let box;
+  var range, width, height, params, box;
 
   $effect(() => {
-    w = range.offsetWidth;
-    h = range.offsetHeight;
+    width = range.offsetWidth;
+    height = range.offsetHeight;
 
     box = range.getBoundingClientRect();
 
@@ -48,9 +43,9 @@
 
   function start(e) {
     isPushed = true;
-    params = getParams(e);
+    const params = getParams(e);
     onstart(params);
-    onmove(params);
+    onaction(params);
   }
 
   function end(e) {
@@ -61,7 +56,7 @@
   function move(e) {
     if (!isPushed) return;
     params = getParams(e);
-    onmove(params);
+    onaction(params);
   }
 
   /**
@@ -75,24 +70,22 @@
         if ( left !== null ) return left;
 				const pageX = isTouch ? e.touches[0].pageX : e.pageX;
 				const value = Math.ceil(pageX - box.left - window.pageXOffset);
-				return left = clamp(value, 0, w);
+				return left = clamp(value, 0, width);
 			},
 			get top() {
         if ( top !== null ) return top;
 				const pageY = isTouch ? e.touches[0].pageY : e.pageY;
 				const value = Math.ceil(pageY - box.top - window.pageYOffset);
-				return top = clamp(value, 0, h);
+				return top = clamp(value, 0, height);
 			},
-      width: w,
-      height: h
+      width,
+      height
 		};
 	}
 
 </script>
-
-<div bind:this={range} {style}>
-  {@render track(params)}
-  {@render thumb(params)}
+<div bind:this={range} {...attrs}>
+  {@render children(args)}
 </div>
 
 <style>
