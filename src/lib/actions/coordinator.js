@@ -1,14 +1,11 @@
-<script>
-  import clamp from "./clamp.js";
 
-  let {
-    args,
-    children,
-    onaction = () => {},
-    onstart = () => {},
-    onend = () => {},
-    ...attrs
-  } = $props();
+import clamp from "../utils/clamp.js";
+
+export default(node, {
+  onaction = () => {},
+  onstart = () => {},
+  onend = () => {}
+} = {}) => {
 
   const isTouch =
 		"ontouchstart" in globalThis
@@ -20,49 +17,36 @@
   ? ["touchstart", "touchend", "touchmove"]
   : ["mousedown", "mouseup", "mousemove"];
 
-
   let isPushed = false;
-  var range, width, height, params, box;
+  let params;
 
-  $effect(() => {
-    width = range.offsetWidth;
-    height = range.offsetHeight;
+  const width = node.offsetWidth;
+  const height = node.offsetHeight;
 
-    box = range.getBoundingClientRect();
-
-    range.addEventListener(eventNames[0], start);
-    document.addEventListener(eventNames[1], end);
-    document.addEventListener(eventNames[2], move);
-
-    return () => {
-      range.removeEventListener(eventNames[0], start);
-      document.removeEventListener(eventNames[1], end);
-      document.removeEventListener(eventNames[2], move);
-    };
-  });
+  const box = node.getBoundingClientRect();
 
   function start(e) {
-    isPushed = true;
     const params = getParams(e);
-    onstart(params);
-    onaction(params);
+    isPushed = onstart(params, e) !== false;
+    
+    if (isPushed)
+    onaction(params, e);
   }
+
 
   function end(e) {
     isPushed = false;
-    onend(params);
+    onend(params, e);
   }
+
 
   function move(e) {
     if (!isPushed) return;
     params = getParams(e);
-    onaction(params);
+    onaction(params, e);
   }
 
-  /**
-	 *
-	 * @param e
-	 */
+  
 	function getParams(e) {
     let left = null, top = null;
 		return {
@@ -83,14 +67,14 @@
 		};
 	}
 
-</script>
-<div bind:this={range} {...attrs}>
-  {@render children(args)}
-</div>
+  node.addEventListener(eventNames[0], start);
+  document.addEventListener(eventNames[1], end);
+  document.addEventListener(eventNames[2], move);
 
-<style>
-  div {
-    position: relative;
-    display: inline-block;
-  }
-</style>
+  return () => {
+    node.removeEventListener(eventNames[0], start);
+    document.removeEventListener(eventNames[1], end);
+    document.removeEventListener(eventNames[2], move);
+  };
+
+};

@@ -1,7 +1,8 @@
 <script>
+  import coordinator from "$lib/actions/coordinator.js";
   import Range, { clamp, scale } from "$lib";
 
-  let size = 246;
+  let size = 201;
   let hueSectHeight = size / 6;
 
   let color = $state({name: 'color', left: '100%', top: 0, onaction: onColorAction});
@@ -92,10 +93,13 @@ style="
 --A: {A};
 ">
   {#each [color, hue, alpha] as {onaction, name, left, top}}
-  <Range {onaction} {onstart} {onend}>
-    <div class="thumb {name}" style:top style:left></div>
-    <div class="track {name}"></div>
-  </Range>
+    <div class="track {name}" use:coordinator={{
+      onaction,
+      onstart,
+      onend
+    }}>
+      <div class="thumb {name}" style:top style:left></div>
+    </div>
   {/each}
 
   <div class="example" style:background-color="rgba({R}, {G}, {B}, {A})"></div>
@@ -140,8 +144,9 @@ hR: {hR} hG: {hG} hB: {hB}
   }
 
   .track {
-    width: 100%;
-    height: 100%;
+    position: relative;
+    /* width: 100%;
+    height: 100%; */
     /* border-radius: 5px; */
   }
 
