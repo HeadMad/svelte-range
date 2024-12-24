@@ -1,6 +1,3 @@
-
-import clamp from "../utils/clamp.js";
-
 export default (node, {
   onaction = () => { },
   onstart = () => { },
@@ -52,14 +49,13 @@ export default (node, {
       get left() {
         if (left !== null) return left;
         const pageX = isTouch ? e.touches[0].pageX : e.pageX;
-        const value = Math.ceil(pageX - box.left - window.pageXOffset);
-        return left = clamp(value, 0, width);
+        return left = Math.ceil(pageX - box.left - window.pageXOffset);
       },
       get top() {
         if (top !== null) return top;
         const pageY = isTouch ? e.touches[0].pageY : e.pageY;
-        const value = Math.ceil(pageY - box.top - window.pageYOffset);
-        return top = clamp(value, 0, height);
+        return top = Math.ceil(pageY - box.top - window.pageYOffset);
+
       },
       width,
       height

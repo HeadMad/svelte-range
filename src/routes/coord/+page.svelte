@@ -20,8 +20,8 @@
   let hG = $state(0);
   let hB = $state(0);
 
-  let x = $state(0);
-  let y = $state(0);
+  let x = 0;
+  let y = 0;
 
   const hueSectionHandlers = [
 		(value) => setHue(255, value, 0),
@@ -32,6 +32,7 @@
 		(value) => setHue(255, 0, 255 - (value || 255)),
 	];
 
+  
 	function setHue(r, g, b) {
 		hR = r;
 		hG = g;
@@ -54,18 +55,21 @@
 
 
   function onColorAction({ left, top}) {
-    color.left = left + 'px';
-    color.top = top + 'px';
-    x = size - left;
-    y = size - top;
+    const l = clamp(left, 0, size);
+    const t = clamp(top, 0, size);
+    color.left = l + 'px';
+    color.top = t + 'px';
+    x = size - l;
+    y = size - t;
     setRGB();
   }
 
 
-  function onHueAction({  top }) {
-    hue.top = top + 'px';
-		const s = clamp( Math.floor(top / hueSectHeight), 0, 5);
-		const rem = top % hueSectHeight;
+  function onHueAction({  top, height }) {
+    const t = clamp(top, 0, height);
+    hue.top = t + 'px';
+		const s = clamp( Math.floor(t / hueSectHeight), 0, 5);
+		const rem = t % hueSectHeight;
 
 		const val = Math.round(scale(rem, [0, hueSectHeight], [0,255]));
 		hueSectionHandlers[s](val);
@@ -74,8 +78,9 @@
 
 
   function onAlphaAction({ left, width, height }) {
-    alpha.left = left + 'px';
-    A = Number(left/width).toFixed(2);
+    const l = clamp(left, 0, width);
+    alpha.left = l + 'px';
+    A = Number(l/width).toFixed(2);
   }
 
   const onstart = () => document.body.classList.add('unselectable');
