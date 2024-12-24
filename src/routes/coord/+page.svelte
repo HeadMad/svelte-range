@@ -83,6 +83,11 @@
 
 </script>
 
+R: {R} G: {G} B: {B} A: {A}
+<br>
+hR: {hR} hG: {hG} hB: {hB}
+<br>
+<br>
 <div
 class="body"
 style="
@@ -106,9 +111,6 @@ style="
 </div>
 
 
-R: {R} G: {G} B: {B} A: {A}
-<br>
-hR: {hR} hG: {hG} hB: {hB}
 
 <style>
 
