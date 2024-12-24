@@ -1,4 +1,5 @@
 <script>
+  import {scale} from "$lib";
   import coordinator from "$lib/actions/coordinator.js";
   // sqrt((х2-х1)^2+(y2-y1)^2)
 
@@ -12,7 +13,7 @@
     onaction({top, left, width, height}) {
       const sqrt = Math.sqrt((top - height / 2) ** 2 + (left - width / 2) ** 2);
 
-      angle = Math.round(Math.atan2(left  / 2, top / 2 ) * 180 / Math.PI);
+      angle = Math.round(Math.atan2(left - width / 2, height / 2 - top) * 180 / Math.PI);
 
       hue = Math.round((angle + 180) / 6);
 
@@ -36,6 +37,8 @@
   <span style="top: {t}; left: {l}"></span>
 </div>
 
+<p style="background: hsl({angle}, 100%, 50%)">{angle} {hue}</p>
+
 
 <style>
   div {
@@ -43,11 +46,11 @@
     height: 300px;
     background-image: conic-gradient(
 			red 0,
-			#f0f 16.6%,
-			#00f 33.2%,
+			#ff0 16.6%,
+			#0f0 33.2%,
 			#0ff 49.8%,
-			#0f0 66.4%,
-			#ff0 83%,
+			#00f 66.4%,
+			#f0f 83%,
 			red
 		);
 
