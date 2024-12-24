@@ -66,10 +66,10 @@ export default (node, {
   document.addEventListener(eventNames[1], end);
   document.addEventListener(eventNames[2], move);
 
-  return () => {
-    node.removeEventListener(eventNames[0], start);
-    document.removeEventListener(eventNames[1], end);
-    document.removeEventListener(eventNames[2], move);
-  };
+  $effect(() => () => {
+      node.removeEventListener(eventNames[0], start);
+      document.removeEventListener(eventNames[1], end);
+      document.removeEventListener(eventNames[2], move);
+  });
 
 };

@@ -1,10 +1,10 @@
 <script>
   import {scale} from "$lib";
-  import coordinator from "$lib/actions/coordinator.js";
+  import coordinator from "$lib/actions/coordinator.svelte.js";
   // sqrt((х2-х1)^2+(y2-y1)^2)
 
-  let t = $state('150px');
-  let l = $state('150px');
+  let t = $state('15px');
+  let l = $state('50%');
   let angle = $state(0);
   let hue = $state(0);
 
@@ -18,12 +18,24 @@
       hue = Math.round((angle + 180) / 6);
 
       const dist = Math.sqrt((150 - top) ** 2 + (150 - left) ** 2);
-      if (dist < 150) {
+
+      const k = 135 / dist;
+        l = (left - 150) * k + 150 + 'px';
+        t = (top - 150) * k + 150 + 'px';
+
+        return;
+
+      if (dist < 150 && dist > 100) {
         t = top + 'px';
         l = left + 'px';
 
-      } else {
+      } else if (dist > 150){
         const k = 150 / dist;
+        l = (left - 150) * k + 150 + 'px';
+        t = (top - 150) * k + 150 + 'px';
+
+      } else {
+        const k = 100 / dist;
         l = (left - 150) * k + 150 + 'px';
         t = (top - 150) * k + 150 + 'px';
       }
@@ -33,9 +45,11 @@
 </script>
 
 {angle} {hue}
-<div use:coordinator={handlers}>
+<div use:coordinator={handlers} style="--angle: {angle}deg">
   <span style="top: {t}; left: {l}"></span>
 </div>
+
+
 
 <p style="background: hsl({angle}, 100%, 50%)">{angle} {hue}</p>
 
@@ -44,6 +58,8 @@
   div {
     width: 300px;
     height: 300px;
+    border-radius: 50%;
+    position: relative;
     background-image: conic-gradient(
 			red 0,
 			#ff0 16.6%,
@@ -54,17 +70,30 @@
 			red
 		);
 
-    border-radius: 50%;
-    position: relative;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      right: 30px;
+      bottom: 30px;
+      border-radius: 50%;
+      background-color: #fff;
+    }
+  
+    
   }
 
   span {
     position: absolute;
-		width: 10px;
+    width: 2px;
+    height: 34px;
+    border: 2px solid #fff;
+		/* width: 10px;
 		height: 10px;
 		border: 2px solid #fff;
+		border-radius: 50%; */
+		transform: translate(-50%, -50%) rotate(var(--angle));
 		box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
-		border-radius: 50%;
-		transform: translate(-50%, -50%);
   }
 </style>
