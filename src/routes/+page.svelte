@@ -102,7 +102,9 @@
       <defs>
         <mask id="circle">
           <rect width="100%" height="100%" fill="black" />
-          <circle r="50%" cx="50%" cy="50%" fill="white" />
+          <circle id="stroke" r="25%" cx="50%" cy="50%" fill="none" stroke="white"/>
+          <circle r="45%" cx="50%" cy="50%" fill="black" />
+          <circle r="2.5%" cx="97.5%" cy="50%" fill="white">
           <circle r="45%" cx="50%" cy="50%" fill="black" />
         </mask>
       </defs>
@@ -121,6 +123,12 @@
 
 
 <style>
+
+  #stroke {
+    stroke-dasharray: calc(9.42 * 18), 942;
+    stroke-width: 50%;
+    /* stroke-linecap: round; */
+  }
  
   .card {
     padding: 2rem;
