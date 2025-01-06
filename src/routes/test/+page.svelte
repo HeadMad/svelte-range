@@ -109,7 +109,7 @@
       position: absolute;
       inset: 0;
       background-image: conic-gradient(
-      from 25deg at 50% 50%, #ffffff00, red 118deg, black 118deg);
+      from 25deg at 50% 50%, red, transparent 118deg);
     }
 
   .light {
@@ -121,4 +121,22 @@
   .result {
     background: red;
   }
+
+  /* .alpha::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: conic-gradient(
+      from 25deg at 50% 50%, #ffffff00, red 118deg, black 118deg);
+    }
+
+  .light {
+    
+    background-image: conic-gradient(
+      from 263deg at 50% 50%, white 240deg, #f00);
+  }
+
+  .result {
+    background: red;
+  } */
 </style>
