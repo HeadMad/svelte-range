@@ -119,6 +119,6 @@
   }
 
   .result {
-    background: #000;
+    background: red;
   }
 </style>
