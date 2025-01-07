@@ -16,5 +16,5 @@ export default function hslaToRgba(h, s, l, a = 1) {
     const color = l - m * Math.max(Math.min(k - 3, 9 - k, 1), -1);
     return Math.round(255 * color);
   };
-  return [convert(0) ,convert(8) ,convert(4), a];
+  return [convert(0), convert(8), convert(4), a];
 }

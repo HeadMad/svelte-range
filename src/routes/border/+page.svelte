@@ -43,22 +43,23 @@
     </svg>
 
     {#snippet circle(name, {r, width, len, L, angle, cap, dash})}
+    <g transform="rotate({angle}, 50, 50)">
     <mask id="{name}">
-
-      <circle id="stroke" cx="50%" cy="50%" fill="black"
-      r="{r}"
-      stroke-width={width}
-      stroke-dasharray="{len}, {L}"
-      transform="rotate({angle}, 50, 50)"
-      stroke-linecap="{cap}"
-      stroke="white"
-      stroke-dashoffset="0"
-      />
-      </mask>
-
-      <foreignObject mask="url(#{name})" width="100" height="100">
-        <div class="square {name}"></div>
-      </foreignObject>
+        <circle id="stroke" cx="50%" cy="50%" fill="black"
+        r="{r}"
+        stroke-width={width}
+        stroke-dasharray="{len}, {L}"
+        
+        stroke-linecap="{cap}"
+        stroke="white"
+        stroke-dashoffset="0"
+        />
+        </mask>
+  
+        <foreignObject mask="url(#{name})" width="100" height="100">
+          <div class="square {name}"></div>
+        </foreignObject>
+</g>
     {/snippet}
 
 <div>
