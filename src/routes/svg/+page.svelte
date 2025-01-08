@@ -1,57 +1,70 @@
 <script>
-  import { scale, clamp } from "$lib";
+  import { scale, clamp, toDegrees, toRadians } from "$lib";
   import coordinator from "$lib/actions/coordinator.svelte.js";
 
-  
   let size = 300;
   const trackWidth = 18;
   const gap = 24;
 
-  
-  let  half = size / 2;
-  
+  let half = size / 2;
+
   const hueOrbit = trackWidth * 1.5 + gap;
   const hueRadius = half - hueOrbit;
   const hueArea = [half - trackWidth - gap, half - gap - trackWidth * 2];
-  
+
   const sectOrbit = trackWidth / 2;
   const sectRadius = half - sectOrbit;
   const sectArea = [half, half - trackWidth];
 
-  const darkArea = [];
-
-  let outerRadius = size / 2;
-  let innerRadius = outerRadius - size / 20;
-  let slSize = Math.floor((innerRadius - 10) * 1.4);
-
   let H = $state(0);
   let S = $state(100);
   let L = $state(50);
+  let LT = $state(100);
+  let DK = 1;
   let A = $state(1);
 
   let huePicker = $state({
-    ...getLeftTopFromAngle(0, hueRadius),
+    angle: 0,
+    min: -180,
+    max: 180,
+    radius: hueRadius,
   });
 
   let darkPicker = $state({
-    ...getLeftTopFromAngle(-150, sectRadius),
-    from: -150,
-    to: -30,
+    angle: -90,
+    radius: sectRadius,
+    min: -150,
+    max: -39,
   });
 
   let lightPicker = $state({
-    ...getLeftTopFromAngle(-30, sectRadius),
-    from: -30,
-    to: 90,
+    angle: 0,
+    radius: sectRadius,
+    min: -30,
+    max: 81,
   });
 
   let alphaPicker = $state({
-    ...getLeftTopFromAngle(0, sectRadius),
-    from: 90,
-    to: -150,
+    angle: 120,
+    radius: sectRadius,
+    min: 90,
+    max: 201
   });
 
+  const pickerHandlers = new Map([
+    [huePicker, ({angle}) => H = angle],
+    [lightPicker, ({angle, min, max}) => {
+      LT = scale(angle, [min, max], [50, 100]);
+      L = LT * DK;
 
+      S = scale(angle, [min, max], [100, 0]);
+    }],
+    [darkPicker, ({angle, min, max}) => {
+      DK = scale(angle, [min, max], [0, 1]);
+      L = DK * LT;
+    }],
+    [alphaPicker, ({angle, min, max}) => A = scale(angle, [min, max], [0, 1])],
+  ]);
 
   let activePicker = null;
 
@@ -60,15 +73,20 @@
       document.body.classList.add("unselectable");
       const dist = Math.sqrt((150 - top) ** 2 + (150 - left) ** 2);
 
+      if (dist > hueArea[1] && dist < hueArea[0])
+        return (activePicker = huePicker);
 
-        if (dist > hueArea[1] && dist < hueArea[0])
-          return activePicker = huePicker;
+      if (dist > sectArea[1] && dist < sectArea[0]) {
+        const angle = Math.round(
+          (Math.atan2(left - half, half - top) * 180) / Math.PI,
+        );
 
-        if (dist > sectArea[1] && dist < sectArea[0]) {
-          const angle = Math.round((Math.atan2(left - half, half - top) * 180) / Math.PI);
-        }
-
-
+        activePicker = [darkPicker, lightPicker, alphaPicker].find(
+          (picker) =>
+            (picker.min < angle && angle < picker.max) ||
+            (picker.max > 180 && (angle > picker.min || angle < picker.max)),
+        );
+      }
     },
 
     onend() {
@@ -76,24 +94,29 @@
       activePicker = null;
     },
     onaction({ top, left, width, height }) {
+      if (activePicker === null) return;
+
       const dist = Math.sqrt((half - top) ** 2 + (half - left) ** 2);
 
+      let angle = Math.round(
+        (Math.atan2(left - half, half - top) * 180) / Math.PI,
+      );
 
-      if (activePicker === huePicker) {
-        H = Math.round((Math.atan2(left - half, half - top) * 180) / Math.PI);
-        const k = hueRadius / dist;
-        activePicker.left = (left - half) * k + half;
-        activePicker.top = (top - half) * k + half;
-      }
+      if (activePicker.max > 180) angle = (angle + 360) % 360;
+
+      const deg = clamp(angle, activePicker.min, activePicker.max);
+      activePicker.angle = deg;
+
+      pickerHandlers.get(activePicker)(activePicker);
     },
   };
 
-  const hue = { r: 33, "stroke-width": 6, stroke: "white" };
 
   function getLeftTopFromAngle(angle, radius) {
+    const radians = toRadians(angle);
     return {
-      left: half + Math.cos(angle) * radius,
-      top: half + Math.sin(angle) * radius,
+      top: half - Math.cos(radians) * radius,
+      left: half + Math.sin(radians) * radius,
     };
   }
 
@@ -101,7 +124,7 @@
     radius = 50,
     progress = 31,
     width = 6,
-    cap = "round",
+    cap = "butt",
   } = {}) {
     const L = radius * 2 * Math.PI;
     const len = (L / 100) * progress;
@@ -116,17 +139,15 @@
 
   const sector = createSect();
 </script>
-{sectRadius}
-
 
 <div
   class="body"
   use:coordinator={handlers}
   style="
---angle: {H}deg;
---sl-size: {slSize}px;
+--HL: hsl({H}, 100%, {LT}%);
 --HUE: hsl({H}, 100%, 50%);
 --HSL: hsl({H}, {S}%, {L}%);
+--HSLA: hsl({H}, {S}%, {L}%, {A});
 "
 >
   <svg
@@ -135,25 +156,25 @@
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
   >
-    {@render circle("hue", hue)}
+    {@render circle("hue", { r: 33, "stroke-width": 6, stroke: "white" })}
+    {@render circle("result", {r: 20, fill: "white"})}
 
     {@render circle("dark", sector, 120)}
     {@render circle("light", sector, 240)}
     {@render circle("alpha", sector, 0)}
 
-    <circle cx="50" cy="50" r="20" fill="hsla({H}, {S}%, {L}%, {A})" />
+
   </svg>
-  
+
   {@render picker("hue", huePicker)}
   {@render picker("dark", darkPicker)}
   {@render picker("light", lightPicker)}
   {@render picker("alpha", alphaPicker)}
 </div>
 
-{#snippet picker(name, {top, left})}
-<div class="picker picker-{name}"
-    style="top: {top}px; left: {left}px"
-  ></div>
+{#snippet picker(name, { angle, radius })}
+  {@const { left, top } = getLeftTopFromAngle(angle, radius)}
+  <div class="picker picker-{name}" style="top: {top}px; left: {left}px"></div>
 {/snippet}
 
 {#snippet circle(name, props, angle = 0)}
@@ -221,10 +242,10 @@
   }
   .track-dark {
     --from: #000;
-    --to: var(--HSL);
+    --to: var(--HL);
   }
 
-  .track-alpha {
+  .track-alpha, .track-result {
     position: relative;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 2 2' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1' height='1' fill='%230000001a'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%230000001a'/%3E%3C/svg%3E");
     background-size: auto 4px;
@@ -239,6 +260,16 @@
     left: 0;
     bottom: 0;
     right: 0;
+  }
+
+  .track-result::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: var(--HSLA);
   }
 
   :global(.unselectable) {
