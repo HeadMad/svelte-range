@@ -18,9 +18,9 @@
 
   let H = $state(0);
   let S = $state(100);
-  let L = $state(50);
-  let LT = $state(100);
-  let DK = 1;
+  let L = $state(25);
+  let LT = $state(50);
+  let DK = 0.5;
   let A = $state(1);
 
   let huePicker = $state({
@@ -38,14 +38,14 @@
   });
 
   let lightPicker = $state({
-    angle: 0,
+    angle: -30,
     radius: sectRadius,
     min: -30,
     max: 81,
   });
 
   let alphaPicker = $state({
-    angle: 120,
+    angle: 201,
     radius: sectRadius,
     min: 90,
     max: 201
@@ -206,6 +206,18 @@
     background-color: var(--HUE);
     transform: translate(-50%, -50%);
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+  }
+
+  .picker-dark {
+    background-color: var(--HSL);
+  }
+
+  .picker-light {
+    background-color: var(--HL);
+  }
+
+  .picker-alpha {
+    background-color: var(--HSLA);
   }
 
   .track {
