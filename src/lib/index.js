@@ -1,11 +1,1 @@
 export {default} from './comp/range.svelte';
-export {default as scale} from './utils/scale.js';
-export {default as clamp} from './utils/clamp.js';
-export {default as hexToHsla} from './utils/hex-to-hsla.js';
-export {default as hslaToHex} from './utils/hsla-to-hex.js';
-export {default as hexToRgba} from './utils/hex-to-rgba.js';
-export {default as rgbaToHex} from './utils/rgba-to-hex.js';
-export {default as rgbaToHsla} from './utils/rgba-to-hsla.js';
-export {default as hslaToRgba} from './utils/hsla-to-rgba.js';
-export {default as toDegrees} from './utils/to-degrees.js';
-export {default as toRadians} from './utils/to-radians.js';

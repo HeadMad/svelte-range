@@ -1,0 +1,1 @@
+export {default as coordinator} from './coordinator.svelte.js';

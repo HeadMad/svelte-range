@@ -1,9 +1,7 @@
 <script>
   import {onMount} from "svelte";
-  import coordinator from "$lib/actions/coordinator.svelte.js";
-  import { clamp, scale } from "$lib";
-  import hexToHsla from "$lib/utils/hex-to-hsla.js";
-  import hslaToHex from "$lib/utils/hsla-to-hex.js";
+  import coordinator from "../actions/coordinator.svelte.js";
+  import { clamp, scale, hexToHsla, hslaToHex } from "../utils";
 
   let { hex } = $props();
 
