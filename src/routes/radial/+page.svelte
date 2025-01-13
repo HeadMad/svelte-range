@@ -1,5 +1,7 @@
 <script>
   import {RadialColorPicker} from "$lib/comp";
+  let color = $state('#f2d300');
 </script>
-<h1>Hello</h1>
-<RadialColorPicker/>
+<RadialColorPicker bind:color/>
+
+{color}

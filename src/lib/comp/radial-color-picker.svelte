@@ -1,6 +1,9 @@
 <script>
-  import { scale, clamp, toRadians } from "../utils/index.js";
+  import { scale, clamp, toRadians, hexToHsla, hslaToHex } from "../utils";
   import {coordinator} from "../actions";
+
+  let {color = $bindable('#000000')} = $props();
+
 
   let size = 300;
   const trackWidth = 18;
@@ -16,12 +19,19 @@
   const sectRadius = half - sectOrbit;
   const sectArea = [half, half - trackWidth];
 
+
   let H = $state(0);
-  let S = $state(100);
-  let L = $state(20);
-  let LT = $state(scale(S, [100, 0], [50, 100]));
-  let DK = $state(L/LT);
+  let S = $state(0);
+  let L = $state(0);
   let A = $state(1);
+
+  $effect(() => {
+    [H, S, L, A] = hexToHsla(color);
+  });
+
+  $effect(() => {
+    color = hslaToHex(H, S, L, A);
+  });
 
   let huePicker = $state({
     angle: H,
@@ -30,15 +40,15 @@
     radius: hueRadius,
   });
 
-  let darkPicker = $state({
-    angle: scale(DK, [0, 1], [-150, -39]),
+  let lightPicker = $state({
+    angle: scale(L, [0, 100], [-150, -39]),
     radius: sectRadius,
     min: -150,
     max: -39,
   });
 
-  let lightPicker = $state({
-    angle: scale(LT, [50, 100], [-30, 81]),
+  let satPicker = $state({
+    angle: scale(S, [0, 100], [-30, 81]),
     radius: sectRadius,
     min: -30,
     max: 81,
@@ -53,16 +63,8 @@
 
   const pickerHandlers = new Map([
     [huePicker, ({angle}) => H = angle],
-    [lightPicker, ({angle, min, max}) => {
-      LT = scale(angle, [min, max], [50, 100]);
-      L = LT * DK;
-      
-    }],
-    [darkPicker, ({angle, min, max}) => {
-      DK = scale(angle, [min, max], [0, 1]);
-      L = DK * LT;
-      S = scale(angle, [min, max], [0, 100]);
-    }],
+    [satPicker, ({angle, min, max}) => S = scale(angle, [min, max], [0, 100])],
+    [lightPicker, ({angle, min, max}) => L = scale(angle, [min, max], [0, 100])],
     [alphaPicker, ({angle, min, max}) => A = scale(angle, [min, max], [0, 1])],
   ]);
 
@@ -81,7 +83,7 @@
           (Math.atan2(left - half, half - top) * 180) / Math.PI,
         );
 
-        activePicker = [darkPicker, lightPicker, alphaPicker].find(
+        activePicker = [lightPicker, satPicker, alphaPicker].find(
           (picker) =>
             (picker.min < angle && angle < picker.max) ||
             (picker.max > 180 && (angle > picker.min || angle < picker.max)),
@@ -140,13 +142,14 @@
   const sector = createSect();
 </script>
 
-H: {H} S: {S} L: {L} A: {A}
+
 
 <div
   class="body"
   use:coordinator={handlers}
   style="
---HL: hsl({H}, 100%, {LT}%);
+--HL: hsl({H}, 0%, 50%);
+--HS: hsl({H}, {S}%, 50%);
 --HUE: hsl({H}, 100%, 50%);
 --HSL: hsl({H}, {S}%, {L}%);
 --HSLA: hsl({H}, {S}%, {L}%, {A});
@@ -161,16 +164,16 @@ H: {H} S: {S} L: {L} A: {A}
     {@render circle("hue", { r: 33, "stroke-width": 6, stroke: "white" })}
     {@render circle("result", {r: 20, fill: "white"})}
 
-    {@render circle("dark", sector, 120)}
-    {@render circle("light", sector, 240)}
+    {@render circle("light", sector, 120)}
+    {@render circle("sat", sector, 240)}
     {@render circle("alpha", sector, 0)}
 
 
   </svg>
 
   {@render picker("hue", huePicker)}
-  {@render picker("dark", darkPicker)}
   {@render picker("light", lightPicker)}
+  {@render picker("sat", satPicker)}
   {@render picker("alpha", alphaPicker)}
 </div>
 
@@ -210,12 +213,12 @@ H: {H} S: {S} L: {L} A: {A}
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
   }
 
-  .picker-dark {
+  .picker-light {
     background-color: var(--HSL);
   }
 
-  .picker-light {
-    background-color: var(--HL);
+  .picker-sat {
+    background-color: var(--HS);
   }
 
   .picker-alpha {
@@ -239,24 +242,30 @@ H: {H} S: {S} L: {L} A: {A}
     );
   }
 
-  .track-dark,
   .track-light,
+  .track-sat,
   .track-alpha::after {
     background-image: conic-gradient(
-      from 86deg at 50% 50%,
+      from 90deg at 50% 50%,
       var(--from, #fff),
-      var(--to, #666) 120deg,
-      red 120deg
+      var(--to, #000) 112deg,
+      transparent 112deg
     );
   }
 
   .track-light {
-    --from: var(--HUE);
-    --to: #fff;
+    background-image: conic-gradient(
+      from 90deg at 50% 50%,
+      #000,
+      var(--HS) 56deg,
+      #fff 112deg,
+      transparent 112deg
+    );
   }
-  .track-dark {
-    --from: #000;
-    --to: var(--HL);
+
+  .track-sat {
+    --from: var(--HL);
+    --to: var(--HUE);
   }
 
   .track-alpha, .track-result {
