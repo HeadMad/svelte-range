@@ -25,9 +25,9 @@
   let L = $state(0);
   let A = $state(1);
 
-  $effect(() => {
-    [H, S, L, A] = hexToHsla(color);
-  });
+
+  [H, S, L, A] = hexToHsla(color);
+
 
   $effect(() => {
     color = hslaToHex(H, S, L, A);
@@ -145,29 +145,31 @@
 
 
 <div
-  class="body"
-  use:coordinator={handlers}
-  style="
+class="body"
+use:coordinator={handlers}
+style="
 --HL: hsl({H}, 0%, 50%);
 --HS: hsl({H}, {S}%, 50%);
 --HUE: hsl({H}, 100%, 50%);
 --HSL: hsl({H}, {S}%, {L}%);
 --HSLA: hsl({H}, {S}%, {L}%, {A});
-"
->
-  <svg
-    width="100%"
+">
+
+<svg
+id="colorpicker"
+width="100%"
     height="100%"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
-  >
-    {@render circle("hue", { r: 33, "stroke-width": 6, stroke: "white" })}
+    >
+    {@render mask("result")}
     {@render circle("result", {r: 20, fill: "white"})}
-
+    {@render circle("hue", { r: 33, "stroke-width": 6, stroke: "white" })}
+    
     {@render circle("light", sector, 120)}
     {@render circle("sat", sector, 240)}
+    {@render mask("alpha")}
     {@render circle("alpha", sector, 0)}
-
 
   </svg>
 
@@ -176,6 +178,12 @@
   {@render picker("sat", satPicker)}
   {@render picker("alpha", alphaPicker)}
 </div>
+
+{#snippet mask(name)}
+  <foreignObject mask="url(#mask-{name})" width="100" height="100">
+    <div class="track transparent"></div>
+  </foreignObject>
+{/snippet}
 
 {#snippet picker(name, { angle, radius })}
   {@const { left, top } = getLeftTopFromAngle(angle, radius)}
@@ -200,6 +208,10 @@
     width: 300px;
     height: 300px;
     border: 1px solid #ccc;
+  }
+
+  svg {
+    position: absolute;
   }
 
   .picker {
@@ -244,7 +256,7 @@
 
   .track-light,
   .track-sat,
-  .track-alpha::after {
+  .track-alpha {
     background-image: conic-gradient(
       from 90deg at 50% 50%,
       var(--from, #fff),
@@ -268,30 +280,17 @@
     --to: var(--HUE);
   }
 
-  .track-alpha, .track-result {
-    position: relative;
+  .track.transparent {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 2 2' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1' height='1' fill='%230000001a'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%230000001a'/%3E%3C/svg%3E");
     background-size: auto 4px;
   }
 
-  .track-alpha::after {
+  .track-alpha {
     --from: transparent;
     --to: var(--HSL);
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
   }
 
-  .track-result::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+  .track-result {
     background-color: var(--HSLA);
   }
 

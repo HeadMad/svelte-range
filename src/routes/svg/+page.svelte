@@ -157,10 +157,10 @@
     viewBox="0 0 100 100"
   >
     {@render circle("hue", { r: 33, "stroke-width": 6, stroke: "white" })}
-    {@render circle("result", {r: 20, fill: "white"})}
-
+    
     {@render circle("dark", sector, 120)}
     {@render circle("light", sector, 240)}
+    {@render circle("result", {r: 20, fill: "white"})}
     {@render circle("alpha", sector, 0)}
 
 
@@ -261,6 +261,14 @@
     position: relative;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 2 2' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1' height='1' fill='%230000001a'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%230000001a'/%3E%3C/svg%3E");
     background-size: auto 4px;
+  }
+
+  .track-alpha {
+    mask: url(#mask-alpha);
+  }
+
+  .track-result {
+    mask: url(#mask-result);
   }
 
   .track-alpha::after {
