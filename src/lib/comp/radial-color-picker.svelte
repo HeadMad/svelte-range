@@ -1,8 +1,11 @@
 <script>
-  import { scale, clamp, toRadians, hexToHsla, hslaToHex } from "../utils";
+  import { scale, clamp, toRadians, hexToHsla, hslaToHex, hslaToRgba } from "../utils";
   import {coordinator} from "../actions";
 
-  let {color = $bindable('#000000')} = $props();
+  let {
+    color = "#ff0000",
+    onchange = () => {},
+  } = $props();
 
 
   let size = 300;
@@ -30,7 +33,15 @@
 
 
   $effect(() => {
-    color = hslaToHex(H, S, L, A);
+    onchange({
+      hsla: [H, S, L, A],
+      get hex() {
+        return hslaToHex(H, S, L, A);
+      },
+      get rgba() {
+        return hslaToRgba(H, S, L, A);
+      }
+    });
   });
 
   let huePicker = $state({
