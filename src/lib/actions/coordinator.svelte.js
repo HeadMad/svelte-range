@@ -1,23 +1,27 @@
 export default (node, {
+  init = () => {},
   onaction = () => { },
   onstart = () => { },
   onend = () => { }
 } = {}) => {
 
-  const isTouch =
+  const box = node.getBoundingClientRect();
+
+  const isTouchscreen =
     "ontouchstart" in globalThis
     || (globalThis.DocumentTouch && document instanceof globalThis.DocumentTouch)
     || navigator.maxTouchPoints > 0
     || globalThis.navigator.msMaxTouchPoints > 0;
 
-  const eventNames = isTouch
+  init({isTouchscreen, box});
+
+  const eventNames = isTouchscreen
     ? ["touchstart", "touchend", "touchmove"]
     : ["mousedown", "mouseup", "mousemove"];
 
   let isPushed = false;
   let params;
 
-  const box = node.getBoundingClientRect();
 
   function start(e) {
     const params = getParams(e);
@@ -48,12 +52,12 @@ export default (node, {
     return {
       get left() {
         if (left !== null) return left;
-        const pageX = isTouch ? e.touches[0].pageX : e.pageX;
+        const pageX = isTouchscreen ? e.touches[0].pageX : e.pageX;
         return left = Math.ceil(pageX - box.left - window.pageXOffset);
       },
       get top() {
         if (top !== null) return top;
-        const pageY = isTouch ? e.touches[0].pageY : e.pageY;
+        const pageY = isTouchscreen ? e.touches[0].pageY : e.pageY;
         return top = Math.ceil(pageY - box.top - window.pageYOffset);
 
       },
