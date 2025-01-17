@@ -5,22 +5,24 @@
   let {
     color = "#ff0000",
     onchange = () => {},
+    size = 300,
   } = $props();
 
+  const trackWidth = 6;
+  const trackGap = 8;
 
-  let size = 300;
-  const trackWidth = 18;
-  const gap = 24;
+  const pxWidth = trackWidth*size/100;
+  const pxGap = trackGap*size/100;
 
   let half = size / 2;
 
-  const hueOrbit = trackWidth * 1.5 + gap;
+  const hueOrbit = pxWidth * 1.5 + pxGap;
   const hueRadius = half - hueOrbit;
-  const hueArea = [half - trackWidth - gap, half - gap - trackWidth * 2];
+  const hueArea = [half - pxWidth - pxGap, half - pxGap - pxWidth * 2];
 
-  const sectOrbit = trackWidth / 2;
+  const sectOrbit = pxWidth / 2;
   const sectRadius = half - sectOrbit;
-  const sectArea = [half, half - trackWidth];
+  const sectArea = [half, half - pxWidth];
 
 
   let H = $state(0);
@@ -135,18 +137,20 @@
 
   function createSect({
     radius = 50,
-    progress = 31,
-    width = 6,
     cap = "butt",
   } = {}) {
     const L = radius * 2 * Math.PI;
-    const len = (L / 100) * progress;
+    let k = cap === 'round' ? trackWidth : 0;
+    const len = (L - trackGap *3 - k*3) / 3;
     return {
-      r: radius - width / 2,
+      r: radius - trackWidth / 2,
       stroke: "white",
-      "stroke-width": width,
-      "stroke-dasharray": len - width + "," + L,
+      "stroke-width": trackWidth,
+      "stroke-dasharray": len - trackWidth + "," + L,
       "stroke-linecap": cap,
+      getAngle(num) {
+        return 360 / 3 * num + k/2;
+      }
     };
   }
 
@@ -177,10 +181,10 @@ width="100%"
     {@render circle("result", {r: 20, fill: "white"})}
     {@render circle("hue", { r: 33, "stroke-width": 6, stroke: "white" })}
     
-    {@render circle("light", sector, 120)}
-    {@render circle("sat", sector, 240)}
+    {@render sect("light", sector, 1)}
+    {@render sect("sat", sector, 2)}
     {@render mask("alpha")}
-    {@render circle("alpha", sector, 0)}
+    {@render sect("alpha", sector, 0)}
 
   </svg>
 
@@ -201,8 +205,10 @@ width="100%"
   <div class="picker picker-{name}" style="top: {top}px; left: {left}px"></div>
 {/snippet}
 
-{#snippet circle(name, props, angle = 0)}
-  <g transform="rotate({angle}, 50, 50)">
+
+
+{#snippet sect(name, {getAngle, ...props}, num = 0)}
+  <g transform="rotate({getAngle(num)}, 50, 50)">
     <mask id="mask-{name}">
       <circle cx="50%" cy="50%" {...props} />
     </mask>
@@ -211,6 +217,17 @@ width="100%"
       <div class="track track-{name}"></div>
     </foreignObject>
   </g>
+{/snippet}
+
+
+{#snippet circle(name, props)}
+    <mask id="mask-{name}">
+      <circle cx="50%" cy="50%" {...props} />
+    </mask>
+
+    <foreignObject mask="url(#mask-{name})" width="100" height="100">
+      <div class="track track-{name}"></div>
+    </foreignObject>
 {/snippet}
 
 <style>
@@ -272,7 +289,7 @@ width="100%"
       from 90deg at 50% 50%,
       var(--from, #fff),
       var(--to, #000) 112deg,
-      transparent 112deg
+      red 112deg
     );
   }
 
@@ -282,7 +299,7 @@ width="100%"
       #000,
       var(--HS) 56deg,
       #fff 112deg,
-      transparent 112deg
+      red 112deg
     );
   }
 
