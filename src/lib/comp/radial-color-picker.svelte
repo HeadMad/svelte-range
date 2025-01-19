@@ -84,45 +84,53 @@
   let activePicker = null;
 
   const handlers = {
+
     onstart({ left, top }) {
-      document.body.classList.add("unselectable");
       const dist = Math.sqrt((150 - top) ** 2 + (150 - left) ** 2);
-
-      if (dist > hueArea[1] && dist < hueArea[0])
+      
+      if (dist > hueArea[1] && dist < hueArea[0]) {
+        document.body.classList.add("unselectable");
         return (activePicker = huePicker);
-
+      }
+      
       if (dist > sectArea[1] && dist < sectArea[0]) {
+        document.body.classList.add("unselectable");
         const angle = Math.round(
           (Math.atan2(left - half, half - top) * 180) / Math.PI,
         );
 
-        activePicker = [lightPicker, satPicker, alphaPicker].find(
-          (picker) =>
+        return activePicker = [
+          lightPicker,
+          satPicker,
+          alphaPicker
+        ].find((picker) =>
             (picker.min < angle && angle < picker.max) ||
             (picker.max > 180 && (angle > picker.min || angle < picker.max)),
         );
       }
+
+      return false;
     },
 
     onend() {
       document.body.classList.remove("unselectable");
       activePicker = null;
     },
-    onaction({ top, left, width, height }) {
-      if (activePicker === null) return;
-
-      const dist = Math.sqrt((half - top) ** 2 + (half - left) ** 2);
+    
+    onaction({ top, left }) {
 
       let angle = Math.round(
         (Math.atan2(left - half, half - top) * 180) / Math.PI,
       );
 
-      if (activePicker.max > 180) angle = (angle + 360) % 360;
+      if (activePicker.max > 180)
+        angle = (angle + 360) % 360;
 
       const deg = clamp(angle, activePicker.min, activePicker.max);
       activePicker.angle = deg;
 
       pickerHandlers.get(activePicker)(activePicker);
+
     },
   };
 

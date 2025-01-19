@@ -19,29 +19,29 @@ export default (node, {
     ? ["touchstart", "touchend", "touchmove"]
     : ["mousedown", "mouseup", "mousemove"];
 
-  let isPushed = false;
   let params;
 
+  node.addEventListener(eventNames[0], start);
 
   function start(e) {
-    const params = getParams(e);
-    isPushed = onstart(params, e) !== false;
-
-    if (isPushed)
-      onaction(params, e);
+    params = getParams(e);
+    addEventListener(eventNames[1], end, {once: true});
+    
+    if (onstart(params, e) === false)
+      return;
+  
+    addEventListener(eventNames[2], move);
+    onaction(params, e);
   }
-
-
-  function end(e) {
-    isPushed = false;
-    onend(params, e);
-  }
-
 
   function move(e) {
-    if (!isPushed) return;
     params = getParams(e);
     onaction(params, e);
+  }
+
+  function end(e) {
+    removeEventListener(eventNames[2], move);
+    onend(params, e);
   }
 
 
@@ -66,14 +66,11 @@ export default (node, {
     };
   }
 
-  node.addEventListener(eventNames[0], start);
-  document.addEventListener(eventNames[1], end);
-  document.addEventListener(eventNames[2], move);
+  
 
-  $effect(() => () => {
+  return {
+    destroy() {
       node.removeEventListener(eventNames[0], start);
-      document.removeEventListener(eventNames[1], end);
-      document.removeEventListener(eventNames[2], move);
-  });
-
+    }
+  };
 };
